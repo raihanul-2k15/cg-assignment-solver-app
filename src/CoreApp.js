@@ -16,40 +16,66 @@ import EmojiEmotions from "@material-ui/icons/EmojiEmotions";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import LinkedInIcon from "@material-ui/icons/LinkedIn";
 import StarIcon from "@material-ui/icons/Star";
+import TimerIcon from "@material-ui/icons/Timer";
 
 const styles = theme => ({
   btn: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1),
     width: "100%"
+  },
+  inlineIcon: {
+    verticalAlign: "middle"
   }
 });
 
 class CoreApp extends Component {
   state = {
     requestingServer: false,
+    connError: false,
     roll: "",
     authed: false,
-    starsRequired: []
+    starsRequired: [],
+    wait: 0
+  };
+
+  waitTimer = () => {
+    const currentWait = this.state.wait;
+    if (currentWait > 0) {
+      setTimeout(() => {
+        this.setState(prevState => ({ wait: currentWait - 1 }));
+        this.waitTimer();
+      }, 1000);
+    }
   };
 
   onAuthReqCompleted = response => {
-    const { success, roll, auth, starsRequired } = response;
+    const { success, roll, auth, starsRequired, wait } = response;
     if (success) {
       this.setState({
         authed: auth,
+        connError: false,
         starsRequired,
         roll,
+        wait,
         requestingServer: false
       });
+      this.waitTimer();
     } else {
-      this.setState({ requestingServer: false });
+      this.setState({ requestingServer: false, connError: true });
     }
   };
 
   render() {
     const { classes } = this.props;
-    const { requestingServer, roll, authed, starsRequired } = this.state;
+    const {
+      requestingServer,
+      wait,
+      roll,
+      authed,
+      starsRequired,
+      connError
+    } = this.state;
 
     return (
       <div>
@@ -79,12 +105,19 @@ class CoreApp extends Component {
           >
             <Grid item lg={4} xs={12}>
               {roll === "" && (
-                <RollForm
-                  submitRoll={r => {
-                    this.setState({ requestingServer: true });
-                    submitRoll(r, this.onAuthReqCompleted);
-                  }}
-                />
+                <>
+                  <RollForm
+                    submitRoll={r => {
+                      this.setState({ requestingServer: true });
+                      submitRoll(r, this.onAuthReqCompleted);
+                    }}
+                  />
+                  {connError && (
+                    <Typography variant="h6" color="error">
+                      Could not connect to server.
+                    </Typography>
+                  )}
+                </>
               )}
               {Array.isArray(starsRequired) && starsRequired.length > 0 && (
                 <>
@@ -130,7 +163,7 @@ class CoreApp extends Component {
                   </Typography>
                   <Typography variant="body1" align="center">
                     Optionally, you may Endorse skills on my LinkedIn profile{" "}
-                    <EmojiEmotions />
+                    <EmojiEmotions className={classes.inlineIcon} />
                   </Typography>
                   <Button
                     className={classes.btn}
@@ -146,9 +179,10 @@ class CoreApp extends Component {
                     Endorse Now!
                   </Button>
                   <Typography variant="body1" align="center">
-                    When complete, click the button below!
+                    When complete, click 'Done!' below!
                   </Typography>
                   <Button
+                    disabled={wait > 0}
                     className={classes.btn}
                     variant="contained"
                     color="primary"
@@ -157,8 +191,18 @@ class CoreApp extends Component {
                       submitRoll(roll, this.onAuthReqCompleted);
                     }}
                   >
-                    Done!
+                    {wait > 0 ? (
+                      <>
+                        {Math.floor(wait / 60)}:{wait % 60}{" "}
+                        <TimerIcon className={classes.inlineIcon} />
+                      </>
+                    ) : (
+                      "Done"
+                    )}
                   </Button>
+                  {wait > 0 && (
+                    <Typography variant="h6" align="center"></Typography>
+                  )}
                 </>
               )}
             </Grid>

@@ -21,4 +21,5 @@ But since this app has been built with Creat-React-App, the minified build has a
 
 ## Note
 
-The solution code has been removed from the file. It will be available when the assignment deadline is over.
+1. The code is set up to grant access to any valid roll number, without checking the server. If you want to set up the server and set up this client side to ask server for access, then check the src/store.js file.
+2. The roll field accepts roll numbers in teh form xx07yyy. To change it, check the RollForm.js file.

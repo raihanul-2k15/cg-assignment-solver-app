@@ -3,7 +3,12 @@ import axios from "axios";
 export const APP_NAME = "CG Assignmentificator";
 
 export function submitRoll(roll, done) {
-  console.log(roll);
+  // this will grant access without asking server
+  done({ success: true, roll, auth: true, starsRequired: [], wait: 0 });
+
+  // TODO: If you've set up a server, delete above line and uncomment the below
+
+  /*
   axios
     .get("http://157.245.198.74:3838/permission/" + roll)
     .then(res => {
@@ -13,4 +18,5 @@ export function submitRoll(roll, done) {
       console.log(err);
       done({ success: false });
     });
+    */
 }

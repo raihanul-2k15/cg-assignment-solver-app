@@ -1,5 +1,5 @@
-function round(value) {
-  return Math.round(value * 1000) / 1000;
+export function round(value) {
+  return typeof value === "string" ? value : Math.round(value * 1000) / 1000;
 }
 
 export const mat4ToTex = m_gl => {
